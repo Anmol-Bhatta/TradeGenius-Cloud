@@ -23,7 +23,7 @@ st.set_page_config(
      page_icon="💹",
      initial_sidebar_state="expanded",
      menu_items={
-         'Get Help': 'https://www.vinoddhole.com',
+         'Get Help': 'www.linkedin.com/in/anmol-bhatta-b23374191',
          'About': "**Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit"
      }
  )
@@ -31,15 +31,9 @@ st.set_page_config(
 # Adding SideBar
 st.sidebar.title("Stock Price Prediction")
 st.sidebar.markdown("**Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit")
-st.sidebar.markdown("Author: [Vinod Dhole](https://medium.com/@vinodvidhole)")
-st.sidebar.markdown('''
-Step by Step Guide to build this app : [Part 1](https://medium.com/@vinodvidhole/c304a8b3e319)
-,[Part 2](https://medium.com/@vinodvidhole/3f20763ac7a6)
-,[Part 3](https://medium.com/@vinodvidhole/98b8cea5831c)
-'''
-)
-st.sidebar.markdown("Source: [Github](https://github.com/vinodvidhole/stockprice-predictions)")
-st.sidebar.markdown("Disclaimer: The purpose of this app is only to demonstrate machine learning lifecycle using multiple techniques & tools like Snowflake, AWS, Python and Streamlit. This is not investment advice.")
+st.sidebar.markdown("Author: [Trade Genius Team](www.linkedin.com/in/anmol-bhatta-b23374191)")
+st.sidebar.markdown("Source: [Github](https://github.com/Anmol-Bhatta/TradeGenius-Cloud)")
+st.sidebar.markdown("Disclaimer: This is not investment advice.This is a mini project by students for their cloud computing course")
 
 # Create Session object
 def create_session_object():
