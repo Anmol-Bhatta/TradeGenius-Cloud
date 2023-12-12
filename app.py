@@ -23,7 +23,6 @@ st.set_page_config(
      page_icon="💹",
      initial_sidebar_state="expanded",
      menu_items={
-         'Get Help': 'www.linkedin.com/in/anmol-bhatta-b23374191',
          'About': "**Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit"
      }
  )
@@ -158,15 +157,22 @@ if __name__ == "__main__":
 
         #Calling snowflake stored procedure "sproc_predict_using_prophet(table,show_hist, days", which will predict future prices (Same code grabbed from Article 3)
         pred_list = session.sql(
-                "call sproc_predict_using_prophet('{}', '{}',{})".format('historical_prices',show_history, days)   
+                "call sproc_predict_using_regression('{}', '{}',{})".format('historical_prices',show_history, days)   
                 ).collect()
 
         #Load the Prediction data from stored procedure into DataFrame 
         pred_df = pd.DataFrame(json.loads(pred_list[0][0]))
-        pred_df = pred_df[['ds','yhat']]
+        data_sdf = session.table('historical_prices')
+        data = data_sdf.select('DATE', 'CLOSE','OPEN').to_pandas()
+        data.drop_duplicates(subset='DATE', keep="last", inplace=True)
+        data.dropna(subset=['DATE'])
+        data.sort_values(by='DATE', inplace=True)
+        data.columns = ['ds', 'y','X']
+        pred_df['ds'] = data['ds']
         pred_df['ds'] = pd.to_datetime(pred_df['ds']).dt.date
-        pred_df.columns = ['DATE', 'CLOSE']
-        pred_df.sort_values(by='DATE',inplace=True)
+        pred_df.columns = ['CLOSE', 'DATE']
+        pred_df = pred_df[['DATE', 'CLOSE']]
+        pred_df = pred_df.dropna()
         
         st.subheader('Predicted Prices')
 
@@ -174,7 +180,8 @@ if __name__ == "__main__":
         st.dataframe(pred_df)
         st.subheader('Predicted Price Trend')
 
-        trace0 = go.Scatter(x=price_df['DATE'], y=price_df['CLOSE'],line_color='deepskyblue', name='Actual Prices')
+
+        trace0 = go.Scatter(x=price_df.dropna(subset=['DATE'])['DATE'], y=price_df.dropna(subset=['DATE'])['CLOSE'],line_color='deepskyblue', name='Actual Prices')
 
         trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['CLOSE'],line_color='lime', name='Predicted Prices')
 
