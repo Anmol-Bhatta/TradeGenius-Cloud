@@ -28,7 +28,7 @@ st.set_page_config(
  )
 
 # Adding SideBar
-st.sidebar.title("Stock Price Prediction")
+st.sidebar.title("Trade Genius")
 st.sidebar.markdown("**Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit")
 st.sidebar.markdown("Author: [Trade Genius Team](www.linkedin.com/in/anmol-bhatta-b23374191)")
 st.sidebar.markdown("Source: [Github](https://github.com/Anmol-Bhatta/TradeGenius-Cloud)")
@@ -60,7 +60,7 @@ def fetch_data(session):
     return df
     
 #Setting web page Title
-st.title('Stock Price Prediction')
+st.title('Trade Genius by Team cloud people of ML')
 
 #Drop down selection for Ticker 
 #Currently there is Only one option Google, can add more options like stocks = ('GOOG','AAPL')
