@@ -1,0 +1,157 @@
+--Create a Virtual Warehouse
+CREATE OR REPLACE WAREHOUSE PRICE_PRED WITH WAREHOUSE_SIZE='X-SMALL';
+
+--Create Databse
+CREATE OR REPLACE DATABASE PRICE_PRED_DB;
+
+--Create Schema
+CREATE OR REPLACE SCHEMA PRICE_PRED_SCHEMA;
+
+--create a table to store prices 
+create or replace table historical_prices
+(
+High float,
+Low float,
+Open float,
+Close float,
+Volume integer,
+AdjClose float,
+Date Date,
+Ticker varchar
+);
+
+-- check rows in table 
+select * from historical_prices;
+
+
+--Create Storage Integration 
+CREATE OR REPLACE STORAGE INTEGRATION aws_s3_integration
+type = external_stage
+storage_provider='S3'
+enabled=true
+storage_aws_role_arn='arn:aws:iam::<XXXCHANGETHISXXX>:role/PricePredRole'
+storage_allowed_locations=('s3://stocksprice-prediction/');
+
+--description of integration 
+DESC INTEGRATION AWS_S3_INTEGRATION;
+
+-- permissions
+GRANT USAGE ON INTEGRATION AWS_S3_INTEGRATION TO ROLE ACCOUNTADMIN;
+
+--create file format
+CREATE OR REPLACE FILE FORMAT csv 
+type='csv'
+field_delimiter = ',' 
+record_delimiter = '\n'
+skip_header = 1;
+
+--verify file format is created
+show file formats in database PRICE_PRED_DB;
+
+--need to create stage in order to talk with external integration 
+CREATE OR REPLACE STAGE price_pred_aws_stage
+storage_integration = aws_s3_integration
+file_format = csv
+url = 's3://stocksprice-prediction/';
+
+-- following query will display all avaliable files linked with the stage (i.e. available ib S3 bucket) 
+list @price_pred_aws_stage;
+
+
+-- check rows in table 
+select count(*) from historical_prices;
+
+-- load the data from S3 csv files 
+COPY INTO historical_prices FROM @price_pred_aws_stage/GOOG.csv
+file_format=CSV;
+
+-- check rows in table 
+select * from historical_prices;
+
+-- Bulk upload (multiple files) , skip files with bad data
+truncate table historical_prices;
+select count(*) from historical_prices;
+copy into historical_prices from @price_pred_aws_stage 
+file_format=csv 
+pattern = '.*csv.*'
+on_error = 'Skip_file';-- skip whole files with bad data
+select count(*) from historical_prices;
+
+-- Bulk upload (multiple files), skip only bad data 
+truncate table historical_prices;
+select count(*) from historical_prices;
+copy into historical_prices from @price_pred_aws_stage 
+file_format=csv 
+pattern = '.*csv.*'
+on_error = 'Continue';-- skip only bad data 
+select count(*) from historical_prices;
+
+--by default snowflex dosent load the files is its processed eralier 
+-- use force = true to reload the data 
+copy into historical_prices from @price_pred_aws_stage 
+file_format=csv 
+pattern = '.*csv.*'
+on_error = 'Continue'
+force=true; -- force - true will relode the same file again 
+
+select count(*) from historical_prices;
+
+-- purge the file from S3 once its loaded 
+/*
+copy into historical_prices from @price_pred_aws_stage 
+file_format=csv 
+pattern = '.*csv.*'
+on_error = 'Continue'
+force=true
+purge=true; 
+*/
+truncate table historical_prices;
+
+-- this will perform bulk load of all available non processed csv files from S3, and if there is any bad data it will skip that row and continue the bulk load 
+copy into historical_prices from @price_pred_aws_stage 
+    file_format=csv 
+    pattern = '.*csv.*'
+    on_error = 'Continue';
+
+select count(*) from historical_prices;
+
+
+--lets check if we can control s3 bucket from snowflex 
+-- i am trying to remove the file from the bucket 
+remove @price_pred_aws_stage/GOOG.csv;
+
+list @price_pred_aws_stage;
+
+
+-- SNOW PIPE
+create or replace pipe get_stocks_data_pipe
+  auto_ingest=true
+  as
+    copy into historical_prices from @price_pred_aws_stage 
+    file_format=csv 
+    pattern = '.*csv.*'
+    on_error = 'Continue'
+; 
+
+--pipe definition 
+SHOW PIPES;
+
+--row count
+select count(*) from historical_prices;
+
+
+--Copy history 
+select * from table(information_schema.copy_history(TABLE_NAME=>'historical_prices', START_TIME=> DATEADD(hours, -10000, CURRENT_TIMESTAMP())) ) order by 3 desc;
+
+
+--snow pipe status
+select SYSTEM$PIPE_STATUS( 'get_stocks_data_pipe');
+
+select current_account();
+
+-- Machine Learning part ---
+
+-- Calling stored proc whcih executed prophet model 
+call  sproc_predict_using_prophet('historical_prices', 'N',4);
+
+SHOW PROCEDURES LIKE 'SPROC_PREDICT_USING_PROPHET';
