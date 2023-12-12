@@ -1,0 +1,5 @@
+pip==23.0.1
+streamlit
+snowflake-snowpark-python
+plotly
+pyarrow==10.0.1
