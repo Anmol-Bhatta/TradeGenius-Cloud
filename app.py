@@ -89,7 +89,7 @@ if __name__ == "__main__":
        
     st.subheader('Historical Price Trend')
 
-    #Creating Visualization for Historical Prices (This is exactly same code from Article 2)
+    #Creating Visualization for Historical Prices
     trace = go.Scatter(x=price_df['DATE'], y=price_df['CLOSE'],line_color='deepskyblue', name = 'Actual Prices')
 
     data = [trace]
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         
         prediction_state = st.text('Predicting Future Prices...')
 
-        #Calling snowflake stored procedure "sproc_predict_using_prophet(table,show_hist, days", which will predict future prices (Same code grabbed from Article 3)
+        #Calling snowflake stored procedure "sproc_predict_using_prophet(table,show_hist, days", which will predict future prices
         pred_list = session.sql(
                 "call sproc_predict_using_regression('{}', '{}',{})".format('historical_prices',show_history, days)   
                 ).collect()
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 
 
         
-        #Visualization of Actual Prices vs Predicted Prices (This is exactly same code from Article 2)
+        #Visualization of Actual Prices vs Predicted Prices
         data = [trace0, trace1]
         layout = dict(
             title='Actual Prices vs Predicted Prices',
