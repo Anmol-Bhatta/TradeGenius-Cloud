@@ -28,7 +28,7 @@ st.set_page_config(
  )
 
 # Adding SideBar
-st.sidebar.title("Stock Price Prediction")
+st.sidebar.title("Trade Genius")
 st.sidebar.markdown("**Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit")
 st.sidebar.markdown("Author: [Trade Genius Team](www.linkedin.com/in/anmol-bhatta-b23374191)")
 st.sidebar.markdown("Source: [Github](https://github.com/Anmol-Bhatta/TradeGenius-Cloud)")
@@ -60,7 +60,7 @@ def fetch_data(session):
     return df
     
 #Setting web page Title
-st.title('Stock Price Prediction')
+st.title('Trade Genius by Team cloud people of ML')
 
 #Drop down selection for Ticker 
 #Currently there is Only one option Google, can add more options like stocks = ('GOOG','AAPL')
@@ -162,17 +162,11 @@ if __name__ == "__main__":
 
         #Load the Prediction data from stored procedure into DataFrame 
         pred_df = pd.DataFrame(json.loads(pred_list[0][0]))
-        data_sdf = session.table('historical_prices')
-        data = data_sdf.select('DATE', 'CLOSE','OPEN').to_pandas()
-        data.drop_duplicates(subset='DATE', keep="last", inplace=True)
-        data.dropna(subset=['DATE'])
-        data.sort_values(by='DATE', inplace=True)
-        data.columns = ['ds', 'y','X']
-        pred_df['ds'] = data['ds']
-        pred_df['ds'] = pd.to_datetime(pred_df['ds']).dt.date
-        pred_df.columns = ['CLOSE', 'DATE']
-        pred_df = pred_df[['DATE', 'CLOSE']]
-        pred_df = pred_df.dropna()
+        pred_df[['DATE', 'Forecast']] = pred_df['forecast'].apply(pd.Series)
+        st.subheader('Predicted Prices')
+        pred_df=pred_df.drop['forecast']
+        #Display the prediction output 
+        st.dataframe(pred_df)
         
         st.subheader('Predicted Prices')
 
@@ -183,7 +177,7 @@ if __name__ == "__main__":
 
         trace0 = go.Scatter(x=price_df.dropna(subset=['DATE'])['DATE'], y=price_df.dropna(subset=['DATE'])['CLOSE'],line_color='deepskyblue', name='Actual Prices')
 
-        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['CLOSE'],line_color='lime', name='Predicted Prices')
+        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['Forecast'],line_color='lime', name='Predicted Prices')
 
         #Visualization of Actual Prices vs Predicted Prices (This is exactly same code from Article 2)
         data = [trace0, trace1]
