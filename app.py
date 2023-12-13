@@ -164,7 +164,7 @@ if __name__ == "__main__":
         pred_df = pd.DataFrame(json.loads(pred_list[0][0]))
         pred_df[['DATE', 'Forecast']] = pred_df['forecast'].apply(pd.Series)
         st.subheader('Predicted Prices')
-        pred_df=pred_df.drop['forecast']
+        #pred_df=pred_df.drop['forecast']
         #Display the prediction output 
         st.dataframe(pred_df)
         
