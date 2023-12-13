@@ -146,9 +146,9 @@ if __name__ == "__main__":
         st.dataframe(pred_df)
         st.subheader('Predicted Price Trend')
  
-        trace0 = go.Scatter(x=price_df.dropna(subset=['DATE'], y=price_df['Forecast'],line_color='deepskyblue', name='Actual Prices')
+        trace0 = go.Scatter(x=price_df.dropna(subset=['DATE']), y=price_df['CLOSE'],line_color='deepskyblue', name='Actual Prices')
  
-        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['CLOSE'],line_color='lime', name='Predicted Prices')
+        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['Forecast'],line_color='lime', name='Predicted Prices')
  
         #Visualization of Actual Prices vs Predicted Prices (This is exactly same code from Article 2)
         data = [trace0, trace1]
