@@ -145,11 +145,45 @@ if __name__ == "__main__":
         #Display the prediction output 
         st.dataframe(pred_df)
         st.subheader('Predicted Price Trend')
+
+
+
+        pred_list = session.sql(
+                "call sproc_predict_using_regression2('{}', '{}',{})".format('historical_prices',show_history, days)   
+                ).collect()
  
-        trace0 = go.Scatter(x=price_df.dropna(subset=['DATE']), y=price_df['CLOSE'],line_color='deepskyblue', name='Actual Prices')
+        #Load the Prediction data from stored procedure into DataFrame 
+        pred_df = pd.DataFrame(json.loads(pred_list[0][0]))
+        data_sdf = session.table('historical_prices')
+        data = data_sdf.select('DATE', 'CLOSE','OPEN').to_pandas()
+        data.drop_duplicates(subset='DATE', keep="last", inplace=True)
+        data.dropna(subset=['DATE'])
+        data.sort_values(by='DATE', inplace=True)
+        data.columns = ['ds', 'y','X']
+        pred_df['ds'] = data['ds']
+        pred_df['ds'] = pd.to_datetime(pred_df['ds']).dt.date
+        pred_df.columns = ['CLOSE', 'DATE']
+        pred_df = pred_df[['DATE', 'CLOSE']]
+        pred_df = pred_df.dropna()
+        st.subheader('Predicted Prices')
  
-        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['Forecast'],line_color='lime', name='Predicted Prices')
+        #Display the prediction output 
+        st.dataframe(pred_df)
+        st.subheader('Predicted Price Trend')
  
+ 
+        trace0 = go.Scatter(x=price_df.dropna(subset=['DATE'])['DATE'], y=price_df.dropna(subset=['DATE'])['CLOSE'],line_color='deepskyblue', name='Actual Prices')
+ 
+        trace1 = go.Scatter(x=pred_df['DATE'], y=pred_df['CLOSE'],line_color='lime', name='Predicted Prices')
+ 
+        
+
+
+
+
+
+ 
+       
         #Visualization of Actual Prices vs Predicted Prices (This is exactly same code from Article 2)
         data = [trace0, trace1]
         layout = dict(
