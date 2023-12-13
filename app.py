@@ -34,7 +34,7 @@ warehouse = st.secrets["SNOWFLAKE"]["warehouse"]
 
 st.set_page_config(
 
-     page_title="Stock Price Prediction",
+     page_title="Trade Genius",
 
      #layout="wide",
 
@@ -44,7 +44,7 @@ st.set_page_config(
 
      menu_items={
 
-         'Get Help': 'https://www.vinoddhole.com',
+         
 
          'About': "The **Stock Price Prediction** App powered by AWS, Snowflake, Python, Snowpark and Streamlit"
 
@@ -96,7 +96,7 @@ def fetch_data(session):
 
 #Setting web page Title
 
-st.title('Stock Price Prediction')
+st.title('Trade Genius By Cloud people of ML')
  
 #Drop down selection for Ticker 
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     st.subheader('Historical Price Trend')
  
-    #Creating Visualization for Historical Prices (This is exactly same code from Article 2)
+    #Creating Visualization for Historical Prices
 
     trace = go.Scatter(x=price_df['DATE'], y=price_df['CLOSE'],line_color='deepskyblue', name = 'Actual Prices')
  
